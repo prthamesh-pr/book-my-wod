@@ -29,4 +29,5 @@ abstract class AuthProvider {
   });
 
   Future<AuthUser> signInWithGoogle();
+  Future<AuthUser> signInWithFacebook();
 }

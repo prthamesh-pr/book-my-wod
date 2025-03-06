@@ -202,4 +202,25 @@ class SupabaseAuthProvider implements AuthProvider {
 
     return AuthUser.fromSupabase(user);
   }
+
+  @override
+  Future<AuthUser> signInWithFacebook() async {
+    try {
+      final response = await _supabase.auth.signInWithOAuth(
+        supabase.OAuthProvider.facebook,
+      );
+
+      // Wait for authentication to complete and get the user
+      final user = _supabase.auth.currentUser;
+
+      if (user == null) {
+        throw GenericAuthException();
+      }
+
+      return AuthUser.fromSupabase(user);
+    } catch (e) {
+      throw GenericAuthException();
+    }
+  }
+
 }

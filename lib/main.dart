@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp.router(
             title: 'Flutter Demo',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+              colorScheme: ColorScheme.fromSeed(seedColor: customWhite),
               useMaterial3: true,
               textTheme: GoogleFonts.barlowTextTheme(
                 ThemeData(brightness: Brightness.light).textTheme,

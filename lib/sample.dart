@@ -1,3 +1,4 @@
+import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -66,7 +67,7 @@ class _UserListScreenState extends State<UserListScreen> {
       appBar: AppBar(
         title: const Text(
           'Message',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: customWhite),
         ),
         actions: [
           Padding(
@@ -75,7 +76,7 @@ class _UserListScreenState extends State<UserListScreen> {
               'assets/icons/contact.svg',
               height: 24,
               width: 24,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter: const ColorFilter.mode(customWhite, BlendMode.srcIn),
             ),
           ),
         ],
@@ -123,7 +124,7 @@ class _UserListScreenState extends State<UserListScreen> {
             borderSide: BorderSide.none,
           ),
         ),
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: customWhite),
       ),
     );
   }
@@ -137,7 +138,7 @@ class _UserListScreenState extends State<UserListScreen> {
         children: [
           const Text(
             'Chat',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: customWhite),
           ),
           const Icon(Icons.more_horiz, color: Colors.white70),
         ],
@@ -167,12 +168,12 @@ class _UserListScreenState extends State<UserListScreen> {
             backgroundColor: hasUnreadMessages ? Colors.redAccent : Colors.blueAccent,
             child: Text(
               avatarText,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
+              style: const TextStyle(color: customWhite, fontSize: 18),
             ),
           ),
           title: Text(
             name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: customWhite),
           ),
           subtitle: Text(
             lastMessage,

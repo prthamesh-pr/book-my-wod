@@ -6,6 +6,7 @@ class ChatMessage {
   final String message;
   final String messageType; // New field for message type
   final DateTime createdAt;
+  final String? audioPath; // Add audio path to distinguish audio messages
 
   ChatMessage({
     required this.senderId,
@@ -13,7 +14,10 @@ class ChatMessage {
     required this.message,
     required this.messageType,
     required this.createdAt,
+    this.audioPath,
+
   });
+  bool get isAudio => audioPath != null; // Define isAudio getter
 
   // ✅ Convert Supabase response to ChatMessage object safely
   factory ChatMessage.fromMap(Map<String, dynamic> map) {

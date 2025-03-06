@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bookmywod_admin/bloc/auth_bloc.dart';
 import 'package:bookmywod_admin/bloc/events/auth_event_initialize.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state.dart';
@@ -27,11 +26,9 @@ import 'package:bookmywod_admin/screens/gym/create_gym_view.dart';
 import 'package:bookmywod_admin/screens/notification/notification_screen.dart';
 import 'package:bookmywod_admin/screens/sessions/show_session_details_view.dart';
 import 'package:bookmywod_admin/services/database/models/session_model.dart';
-import 'package:bookmywod_admin/services/database/supabase_storage/supabase_db.dart';
 import 'package:bookmywod_admin/shared/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter appRouter(BuildContext context) {
@@ -111,9 +108,7 @@ GoRouter appRouter(BuildContext context) {
               } else if (state is AuthStateUpdatePassword) {
                 return PasswordUpdateScreen();
               } else if (state is AuthStateGymCreation) {
-                return CreateGymView(
-                  authUser: state.authUser,
-                );
+                return CreateGymView(authUser: state.authUser);
               } else if (state is AuthStateLoading) {
                 return const LoadingScreen();
               } else if (state is AuthStateLoggedIn) {
@@ -126,9 +121,10 @@ GoRouter appRouter(BuildContext context) {
               } else if (state is AuthStateLoggedOut) {
                 return SignInScreen();
               }
+
               return const Scaffold(
                 body: Center(
-                  child: SpinKitSpinningLines(color: Colors.blue),
+                  child: CircularProgressIndicator(color: Colors.blue),
                 ),
               );
             },
@@ -140,20 +136,19 @@ GoRouter appRouter(BuildContext context) {
         builder: (context, state) {
           final authBloc = BlocProvider.of<AuthBloc>(context);
           if (authBloc.state is AuthStateLoggedIn) {
-            final authUser = (authBloc.state as AuthStateLoggedIn).authUser;
-            final supabaseDb = (authBloc.state as AuthStateLoggedIn).supabaseDb;
+            final loggedInState = authBloc.state as AuthStateLoggedIn;
             return BottomBarTemplate(
-              authUser: authUser,
-              supabaseDb: supabaseDb,
+              authUser: loggedInState.authUser,
+              supabaseDb: loggedInState.supabaseDb,
             );
           } else {
-            return const SignInScreen();
+            return  SignInScreen();
           }
         },
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => const SignInScreen(),
+        builder: (context, state) =>  SignInScreen(),
       ),
       GoRoute(
         path: '/chat/:userId/:receiverId',  // Define dynamic parameters
@@ -166,6 +161,7 @@ GoRouter appRouter(BuildContext context) {
           }
 
           return ChatScreen(userId: userId, receiverId: receiverId);
+          // return ChatScreen();
         },
       ),
       GoRoute(
@@ -187,9 +183,6 @@ GoRouter appRouter(BuildContext context) {
           );
         },
       ),
-
-
-
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const SendPasswordResetMailScreen(),
@@ -204,7 +197,7 @@ GoRouter appRouter(BuildContext context) {
               authUser: authUser,
             );
           }
-          return const SignInScreen(); // Fallback if state is not correct
+          return  SignInScreen(); // Fallback if state is not correct
         },
       ),
       GoRoute(
@@ -222,8 +215,8 @@ GoRouter appRouter(BuildContext context) {
       GoRoute(
         path: '/session-view',
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
-          final supabaseDb = extra['supbaseDb'] as SupabaseDb;
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final supabaseDb = extra['supabaseDb'];
           final catagoryName = extra['catagoryName'] as String;
           final catagoryId = extra['catagoryId'] as String;
           final creatorId = extra['creatorId'] as String;
@@ -254,14 +247,20 @@ GoRouter appRouter(BuildContext context) {
       GoRoute(
         path: '/create-catagory',
         builder: (context, state) {
-          final data = state.extra as Map<String, dynamic>? ?? {}; // Ensure it's not null
+          print('Received state.extra: ${state.extra}'); // Debugging
 
-          final supabaseDb = data['supabaseDb'] ?? ''; // Default to an empty string
-          final catagoryId = data['catagoryId'] ?? '';
-          final creatorId = data['creatorId'] ?? '';
-          final gymId = data['gymId'] ?? '';
+          final data = state.extra as Map<String, dynamic>? ?? {}; // Ensure it's a Map
+          final supabaseDb = data['supabaseDb']; // No need to cast if it's an object
+          final catagoryId = data['catagoryId'] as String?; // Handle possible null
+          final creatorId = data['creatorId'] as String?;
+          final gymId = data['gymId'] as String?;
           final trainerModel = data['trainerModel']; // If this is an object, ensure it's properly handled.
-
+          print('Extracted values:');
+          print('supabaseDb: $supabaseDb');
+          print('trainerModel: $trainerModel');
+          print('catagoryId: $catagoryId');
+          print('creatorId: $creatorId');
+          print('gymId: $gymId');
           return CreateCatagoryView(
             supabaseDb: supabaseDb,
             trainerModel: trainerModel,
@@ -274,19 +273,19 @@ GoRouter appRouter(BuildContext context) {
       GoRoute(
         path: '/create-session',
         builder: (context, state) {
-          final data = state.extra as Map<String, dynamic>;
-          final supabaseDb = data['supabaseDb'];
-          final catagoryId = data['catagoryId'];
-          final creatorId = data['creatorId'];
-          final sessionModel = data['sessionModel'] as SessionModel?;
-          final gymId = data['gymId'];
+          final data = state.extra as Map<String, dynamic>? ?? {}; // Ensure it's a Map
+          final supabaseDb = data['supabaseDb']; // No need to cast if it's an object
+          final catagoryId = data['catagoryId'] as String?; // Handle possible null
+          final creatorId = data['creatorId'] as String?;
+          final gymId = data['gymId'] as String?;
+          final sessionModel = data['sessionModel'] as SessionModel?; // Handle null safely
 
           return CreateSessionView(
             supabaseDb: supabaseDb,
-            catagoryId: catagoryId,
-            creatorId: creatorId,
+            catagoryId: catagoryId.toString(),
+            creatorId: creatorId.toString(),
             sessionModel: sessionModel,
-            gymId: gymId,
+            gymId: gymId.toString(),
           );
         },
       ),

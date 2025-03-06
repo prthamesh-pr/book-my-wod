@@ -10,11 +10,10 @@ import '../home_screen.dart';
 class BottomBarTemplate extends StatefulWidget {
   final AuthUser? authUser;
   final SupabaseDb? supabaseDb;
-
   const BottomBarTemplate({
     super.key,
      this.authUser,
-    this.supabaseDb,
+    this.supabaseDb
   });
 
   @override
@@ -35,7 +34,7 @@ class _BottomBarTemplateState extends State<BottomBarTemplate> {
             fullName: ''),
         supabaseDb: widget.supabaseDb??SupabaseDb(),
       ),
-      Container(color: Colors.orange), // Replace with Membership Screen
+      Center(child: CircularProgressIndicator()), // Replace with Membership Screen
       MembershipPlanScreen(),
       Profile()
 

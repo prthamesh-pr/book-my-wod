@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:bookmywod_admin/bloc/events/auth_event_create_gym.dart';
+import 'package:bookmywod_admin/bloc/events/auth_event_facebook_signin.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state_gym_creation.dart';
+import 'package:bookmywod_admin/bloc/states/auth_state_loading.dart';
 import 'package:bookmywod_admin/services/database/models/gym_model.dart';
 import 'package:bookmywod_admin/services/database/models/trainer_model.dart';
 import 'package:flutter/material.dart';
@@ -70,14 +72,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
           await dbProvider.createUser(dbUser);
         }
+        // emit(AuthStateLoggedIn(
+        //   authUser: authUser,
+        //   supabaseDb: supabseDb,
+        //   message: StateMessage(
+        //     'Logged in',
+        //     isError: false,
+        //   ),
+        // ));
         emit(AuthStateLoggedIn(
           authUser: authUser,
           supabaseDb: supabseDb,
+          creatorId: dbUser.creatorId ?? '',
+          gymId: dbUser.gymId ?? '',
+          catagoryId: dbUser.catagoryId ?? '',
           message: StateMessage(
             'Logged in',
             isError: false,
           ),
         ));
+
       }
     });
 
@@ -170,6 +184,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthEventLogin>((event, emit) async {
+      emit(AuthStateLoading());  // Show loading state
+
       emit(const AuthStateLoggedOut(
         exception: null,
         message: StateMessage(
@@ -216,8 +232,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           ));
         } else if (authUser.isEmailVerified) {
           emit(AuthStateLoggedIn(
-            supabaseDb: supabseDb,
+            supabaseDb: dbService,
             authUser: authUser,
+            creatorId: userModel.creatorId ?? '',
+            gymId: userModel.gymId ?? '',
+            catagoryId: userModel.catagoryId ?? '',
             message: StateMessage(
               'Logged in successfully',
               isError: false,
@@ -371,6 +390,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthStateLoggedIn(
         supabaseDb: supabseDb,
         authUser: event.authUser,
+
         message: StateMessage(
           'Gym created',
           isError: false,
@@ -427,5 +447,97 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       }
     });
+    // on<AuthEventSignInWithFacebook>((event, emit) async {
+    //   emit(
+    //     const AuthStateLoggedOut(
+    //       exception: null,
+    //       message: StateMessage(
+    //         'Logging in with Facebook',
+    //         isError: false,
+    //       ),
+    //     ),
+    //   );
+    //
+    //   try {
+    //     var user = await authProvider.signInWithFacebook();  // ✅ Corrected function
+    //     var dbProvider = SupabaseDb();
+    //
+    //     var dbUser = await dbProvider.getUser(user.id);
+    //     if (dbUser == null) {
+    //       dbUser = UserModel.newUser(
+    //         id: user.id,
+    //         fullName: user.fullName,
+    //       );
+    //       await dbProvider.createUser(dbUser);
+    //     }
+    //
+    //     final trainer = await dbProvider.getTrainerByAuthId(user.id);
+    //     if (trainer == null) {
+    //       emit(AuthStateGymCreation(
+    //         authUser: user,
+    //         exception: null,
+    //         message: StateMessage('Please create a gym', isError: false),
+    //       ));
+    //     } else {
+    //       await dbProvider.updateTrainer(
+    //         trainer.copyWith(avatarUrl: user.profileImageUrl),
+    //       );
+    //       emit(AuthStateLoggedIn(
+    //         supabaseDb: supabseDb,
+    //         authUser: user,
+    //       ));
+    //     }
+    //   } on Exception catch (e) {
+    //     emit(
+    //       AuthStateLoggedOut(
+    //         exception: e,
+    //         message: StateMessage(
+    //           'Login failed',
+    //           isError: true,
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // });
+    on<AuthEventSignInWithFacebook>((event, emit) async {
+      emit(const AuthStateLoading());
+
+      try {
+        var user = await authProvider.signInWithFacebook();
+        var dbProvider = SupabaseDb();
+
+        var dbUser = await dbProvider.getUser(user.id);
+        if (dbUser == null) {
+          dbUser = UserModel.newUser(
+            id: user.id,
+            fullName: user.fullName,
+          );
+          await dbProvider.createUser(dbUser);
+        }
+
+        final trainer = await dbProvider.getTrainerByAuthId(user.id);
+        if (trainer == null) {
+          emit(AuthStateGymCreation(
+            authUser: user,
+            exception: null,
+            message: StateMessage('Please create a gym', isError: false),
+          ));
+        } else {
+          await dbProvider.updateTrainer(
+            trainer.copyWith(avatarUrl: user.profileImageUrl),
+          );
+          emit(AuthStateLoggedIn(
+            supabaseDb: supabseDb,
+            authUser: user,
+          ));
+        }
+      } on Exception catch (e) {
+        emit(AuthStateLoggedOut(
+          exception: e,
+          message: StateMessage('Login failed', isError: true),
+        ));
+      }
+    });
+
   }
 }

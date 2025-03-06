@@ -1,6 +1,5 @@
+import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../services/database/models/membership_model.dart';
 
 class MembershipPlanScreen extends StatefulWidget {
   @override
@@ -8,45 +7,49 @@ class MembershipPlanScreen extends StatefulWidget {
 }
 
 class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
-  late Future<List<MembershipPlan>> _membershipPlans;
-  int selectedIndex = 0; // Default: "Trail" tab
+  int selectedIndex = 0; // Default selected tab
 
-  @override
-  void initState() {
-    super.initState();
-    _membershipPlans = fetchMembershipPlans();
-  }
+  final List<String> tabs = ["Trail", "Monthly", "Yearly"];
 
-  Future<List<MembershipPlan>> fetchMembershipPlans() async {
-    final supabase = Supabase.instance.client;
-    final response = await supabase.from('membershipplan').select();
-    print("Supabase Response: $response"); // Debugging output
-
-    if (response.isEmpty) {
-      print("No membership plans found in database.");
-      return [];
-    }
-    return response.map((json) => MembershipPlan.fromJson(json)).toList();
-  }
+  // Mock Data
+  final List<Map<String, String>> mockData = [
+    {"name": "Makenna Curtis", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Kierra Siphron", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Cheyenne Levin", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Jaylon Lubin", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Marcus Dorwart", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Roger Schleifer", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Omar Saris", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Hanna Donin", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Nolan Vaccaro", "price": "€ 80", "expireDate": "20 Jan 2024"},
+    {"name": "Desirae Vaccaro", "price": "€ 80", "expireDate": "20 Jan 2024"},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black, // Dark background
       appBar: AppBar(
-        title: Text("Membership"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20), // Match the style in the image
+          onPressed: () {
+          },
+        ),
+        title: Text("Membership", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         elevation: 0,
       ),
+
+
       body: Column(
         children: [
           // Tab Bar (Trail, Monthly, Yearly)
           Container(
+            width: double.infinity,
             padding: EdgeInsets.symmetric(vertical: 10),
-            color: Colors.black,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: ["Trail", "Monthly", "Yearly"].asMap().entries.map((entry) {
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: tabs.asMap().entries.map((entry) {
                 int idx = entry.key;
                 String name = entry.value;
                 return GestureDetector(
@@ -55,13 +58,23 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
                       selectedIndex = idx;
                     });
                   },
-                  child: Text(
-                    name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: selectedIndex == idx ? Colors.blue : Colors.white60,
-                    ),
+                  child: Column(
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: selectedIndex == idx ? Colors.blue : Colors.white60,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Container(
+                        width: 40,
+                        height: 2,
+                        color: selectedIndex == idx ? Colors.blue : Colors.transparent,
+                      ),
+                    ],
                   ),
                 );
               }).toList(),
@@ -70,70 +83,39 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
 
           // Membership Table
           Expanded(
-            child: FutureBuilder<List<MembershipPlan>>(
-              future: _membershipPlans,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error loading membership plans", style: TextStyle(color: Colors.white)));
-                }
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columnSpacing: 50,
+                  headingRowColor: MaterialStateColor.resolveWith((states) => customGrey),
+                  dataRowColor: MaterialStateColor.resolveWith((states) => Colors.black),
+                  border: TableBorder.all(color: customWhite, width: 1),
+                  columns: [
+                    DataColumn(
+                        label: Text("Member Name", style: headerStyle)),
+                    DataColumn(
+                        label: Text("Plan Price", style: headerStyle)),
+                    DataColumn(
+                        label: Text("Expire Date", style: headerStyle)),
+                  ],
+                  rows: mockData.map((plan) {
+                    return DataRow(
 
-                final plans = snapshot.data ?? [];
-                if (plans.isEmpty) {
-                  return Center(child: Text("No membership plans available", style: TextStyle(color: Colors.white)));
-                }
 
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Table Headers
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        color: Colors.blueGrey.shade900,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text("Member Name", style: headerStyle),
-                            Text("Plan Price", style: headerStyle),
-                            Text("Expire Date", style: headerStyle),
-                          ],
-                        ),
-                      ),
-
-                      // Table Content
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: plans.length,
-                        itemBuilder: (context, index) {
-                          final plan = plans[index];
-                          return Container(
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              border: Border(bottom: BorderSide(color: Colors.grey.shade800)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Text(plan.details, style: contentStyle),
-                                Text("€ ${plan.price}", style: contentStyle),
-                                Text("20 Jan 2024", style: contentStyle), // Dummy Expiry Date
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+                        cells: [
+                      DataCell(Text(plan["name"]!, style: contentStyle)),
+                      DataCell(Text(plan["price"]!, style: contentStyle)),
+                      DataCell(Text(plan["expireDate"]!, style: boldStyle)),
+                    ]);
+                  }).toList(),
+                ),
+              ),
             ),
           ),
 
           // Bottom Indicator
-          Container(
+          Padding(
             padding: EdgeInsets.all(10),
             child: Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 30),
           ),
@@ -146,3 +128,4 @@ class _MembershipPlanScreenState extends State<MembershipPlanScreen> {
 // Text Styles
 final TextStyle headerStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
 final TextStyle contentStyle = TextStyle(fontSize: 14, color: Colors.white70);
+final TextStyle boldStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white);

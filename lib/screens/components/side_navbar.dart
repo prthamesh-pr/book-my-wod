@@ -1,5 +1,7 @@
 import 'package:bookmywod_admin/bloc/auth_bloc.dart';
 import 'package:bookmywod_admin/bloc/events/auth_event_logout.dart';
+import 'package:bookmywod_admin/screens/membership.dart';
+import 'package:bookmywod_admin/screens/reportscreen/report.dart';
 import 'package:bookmywod_admin/services/auth/auth_user.dart';
 import 'package:bookmywod_admin/services/database/models/trainer_model.dart';
 import 'package:bookmywod_admin/services/database/supabase_storage/supabase_db.dart';
@@ -25,8 +27,9 @@ class SideNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+
       child: Container(
-        color: customBlue, // Set the entire drawer background to blue
+        color: customBlue, // Change drawer background color here
         child: Column(
           children: [
             SizedBox(height: 40),
@@ -41,7 +44,7 @@ class SideNavbar extends StatelessWidget {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: NetworkImage(
-                          userModel.avatarUrl ?? 'assets/home/default_profile.png',
+                          userModel.avatarUrl ?? "https://img.freepik.com/premium-photo/memoji-happy-man-white-background-emoji_826801-6839.jpg",
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -116,7 +119,7 @@ class SideNavbar extends StatelessWidget {
             ),
             Expanded(
               child: Container(
-                color: Color(0xff1A2D40), // Set the rest of the drawer white
+                  color: customGrey, // Set the rest of the drawer white
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
@@ -125,10 +128,16 @@ class SideNavbar extends StatelessWidget {
                       title: const Text('Activity'),
                     ),
                     ListTile(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>MembershipPlanScreen()));
+                      },
                       leading: SvgPicture.asset('assets/icons/membership.svg'),
                       title: const Text('Membership'),
                     ),
                     ListTile(
+                      onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ReportScreen()));
+                    },
                       leading: SvgPicture.asset('assets/icons/report.svg'),
                       title: const Text('Report'),
                     ),
@@ -140,9 +149,31 @@ class SideNavbar extends StatelessWidget {
                       leading: SvgPicture.asset('assets/icons/logout.svg'),
                       title: const Text('Logout'),
                       onTap: () {
-                        context.read<AuthBloc>().add(AuthEventLogout());
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Confirm Logout"),
+                            content: const Text("Are you sure you want to logout?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // Close the dialog
+                                },
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // Close the dialog
+                                  context.read<AuthBloc>().add(AuthEventLogout()); // Trigger logout
+                                },
+                                child: const Text("Logout"),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
+
                   ],
                 ),
               ),

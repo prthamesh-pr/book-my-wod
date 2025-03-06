@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
+import 'package:bookmywod_admin/screens/sessions/session_sucess.dart' show SuccessScreen;
 import 'package:bookmywod_admin/services/database/models/session_model.dart';
 import 'package:bookmywod_admin/services/database/supabase_storage/supabase_db.dart';
 import 'package:bookmywod_admin/shared/constants/colors.dart';
@@ -224,6 +225,9 @@ class _CreateSessionViewState extends State<CreateSessionView> {
   @override
   void initState() {
     super.initState();
+    print("bull shit check ${widget.catagoryId}");
+    print("bull shit check ${widget.gymId}");
+    print("bull shit check creator ${widget.creatorId}");
 
     _catagoryNameController = TextEditingController(
       text: widget.sessionModel?.name ?? '',
@@ -596,6 +600,7 @@ class _CreateSessionViewState extends State<CreateSessionView> {
                   showSnackbar(context, "Invalid creator ID", type: SnackbarType.error);
                   return;
                 }
+                print("widgets session model check ${widget.sessionModel}");
 
                 if (widget.sessionModel == null) {
                   final session = SessionModel(
@@ -613,7 +618,8 @@ class _CreateSessionViewState extends State<CreateSessionView> {
                     description: _catagoryDescriptionController.text,
                   );
                   await widget.supabaseDb.createSession(session);
-                } else {
+                }
+                else {
                   final session = widget.sessionModel!.copyWith(
                     name: _catagoryNameController.text,
                     categoryId: widget.catagoryId,
@@ -630,7 +636,7 @@ class _CreateSessionViewState extends State<CreateSessionView> {
                   await widget.supabaseDb.updateSession(session);
                 }
 
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> SuccessScreen()));
               } catch (e) {
                 showSnackbar(context, e.toString(),
                     type: SnackbarType.error);

@@ -7,10 +7,12 @@ import 'package:bookmywod_admin/bloc/chat_bloc.dart';
 import 'package:bookmywod_admin/bloc/events/chat_event.dart';
 import 'package:bookmywod_admin/bloc/states/chat_state.dart';
 import 'package:bookmywod_admin/shared/constants/colors.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 
 class ChatScreen extends StatefulWidget {
   final String userId;
   final String receiverId;
+
 
   const ChatScreen({super.key, required this.userId, required this.receiverId});
 
@@ -22,21 +24,46 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FlutterSoundRecorder _audioRecorder = FlutterSoundRecorder();
   final FlutterSoundPlayer _audioPlayer = FlutterSoundPlayer();
-
+  final supabase = Supabase.instance.client;
+  Map<String, dynamic>? profileData;
+  bool isLoading = true;
   bool _isRecording = false;
   bool _showSendButton = false;
   String? _recordedFilePath;
 
+  Future<void> fetchProfile() async {
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) {
+        setState(() => isLoading = false);
+        return;
+      }
+
+      final response =
+          await supabase.from('profiles').select().eq('id', userId).single();
+
+      setState(() {
+        profileData = response;
+        isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching profile: $error');
+      setState(() => isLoading = false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    print('profile name check ${profileData?['fullName']}');
+    print('profile name check ${profileData}');
     _requestPermissions();
     BlocProvider.of<ChatBloc>(context).add(
       LoadMessages(userId: widget.userId, receiverId: widget.receiverId),
     );
     _audioRecorder.openRecorder();
     _audioPlayer.openPlayer();
-
+    fetchProfile();
     // Listen to text field changes
     _messageController.addListener(() {
       setState(() {
@@ -78,7 +105,8 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       if (await Permission.microphone.isGranted) {
         Directory tempDir = Directory.systemTemp;
-        String uniqueFileName = "voice_message_${DateTime.now().millisecondsSinceEpoch}.aac";
+        String uniqueFileName =
+            "voice_message_${DateTime.now().millisecondsSinceEpoch}.aac";
         String path = "${tempDir.path}/$uniqueFileName";
 
         await _audioRecorder.startRecorder(toFile: path);
@@ -91,7 +119,6 @@ class _ChatScreenState extends State<ChatScreen> {
       debugPrint("Recording Error: $e");
     }
   }
-
 
   Future<void> _stopRecording() async {
     try {
@@ -114,6 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
   String? _currentlyPlayingFile; // Track currently playing audio
 
   Future<void> _playVoiceMessage(String filePath) async {
@@ -146,17 +174,16 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat", style: TextStyle(fontSize: 18)),
-        backgroundColor: Colors.blueAccent,
+        title: Text(profileData?['fullName'] ?? "Chat", style: const TextStyle(fontSize: 18)),
+        backgroundColor: customGrey,
       ),
       body: Column(
         children: [
+          const SizedBox(height: 10),
           Expanded(
             child: BlocBuilder<ChatBloc, ChatState>(
               builder: (context, state) {
@@ -178,79 +205,110 @@ class _ChatScreenState extends State<ChatScreen> {
                             : Alignment.centerLeft,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: IntrinsicWidth(
-                            child: Container(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 0.8, // Max 80% of screen
-                              ),                              padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 14.0),
-                            
-                              decoration: BoxDecoration(
-                                color: isCurrentUser
-                                    ? Colors.blueAccent
-                                    : Colors.grey[300],
-                                borderRadius: BorderRadius.only(
-                                  topLeft: const Radius.circular(16),
-                                  topRight: const Radius.circular(16),
-                                  bottomLeft: isCurrentUser
-                                      ? const Radius.circular(16)
-                                      : Radius.zero,
-                                  bottomRight: isCurrentUser
-                                      ? Radius.zero
-                                      : const Radius.circular(16),
+                          child: Row(
+                            mainAxisAlignment: isCurrentUser
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!isCurrentUser) // Show avatar for receiver
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: profileData!['avatar_url'] != null
+                                      ? NetworkImage(profileData!['avatar_url'])
+                                      : null,
+                                  child: profileData!['avatar_url'] == null
+                                      ? const Icon(Icons.person, size: 20, color: Colors.grey)
+                                      : null,
+                                ),
+                              const SizedBox(width: 8),
+                              IntrinsicWidth(
+                                child: Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width * 0.7,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 14),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isCurrentUser ? customGrey : customGrey,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: const Radius.circular(16),
+                                      topRight: const Radius.circular(16),
+                                      bottomLeft: isCurrentUser
+                                          ? const Radius.circular(16)
+                                          : Radius.zero,
+                                      bottomRight: isCurrentUser
+                                          ? Radius.zero
+                                          : const Radius.circular(16),
+                                    ),
+                                  ),
+                                  child: isVoiceMessage
+                                      ? GestureDetector(
+                                          onTap: () => _playVoiceMessage(
+                                              message.message),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                _currentlyPlayingFile ==
+                                                        message.message
+                                                    ? Icons.pause
+                                                    : Icons.play_arrow,
+                                                color: isCurrentUser
+                                                    ? Colors.white
+                                                    : Colors.white,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Text(
+                                                "Voice Message",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              message.message,
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: isCurrentUser
+                                                      ? Colors.white
+                                                      : Colors.white),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: Text(
+                                                message.getFormattedDate(),
+                                                style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                 ),
                               ),
-                              child: isVoiceMessage
-                                  ?  GestureDetector(
-                                onTap: () => _playVoiceMessage(message.message),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _currentlyPlayingFile == message.message ? Icons.pause : Icons.play_arrow,
-                                      color: isCurrentUser ? Colors.white : Colors.black,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "Voice Message",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: isCurrentUser ? Colors.white : Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                              const SizedBox(width: 8),
+                              if (isCurrentUser) // Show avatar for sender
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: profileData!['avatar_url'] != null
+                                      ? NetworkImage(profileData!['avatar_url'])
+                                      : null,
+                                  child: profileData!['avatar_url'] == null
+                                      ? const Icon(Icons.person, size: 20, color: Colors.grey)
+                                      : null,
                                 ),
-                              )
-
-                              : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          message.message,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: isCurrentUser
-                                                ? Colors.black
-                                                : Colors.black,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: Text(
-                                            message.getFormattedDate(),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: isCurrentUser
-                                                  ? Colors.black
-                                                  : Colors.black87,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                            ),
+                            ],
                           ),
                         ),
                       );

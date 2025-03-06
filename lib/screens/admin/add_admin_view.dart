@@ -137,9 +137,9 @@ class _AddAdminViewState extends State<AddAdminView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: customGrey,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: customGrey,
         title: const Text('Add Admin', style: TextStyle(fontSize: 20)),
       ),
       body: SingleChildScrollView(
@@ -157,14 +157,14 @@ class _AddAdminViewState extends State<AddAdminView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Member', style: TextStyle(fontSize: 20, color: Colors.white)),
+                    const Text('Total Member', style: TextStyle(fontSize: 20, color: customWhite)),
                     const SizedBox(height: 10),
                     OwnerTile(
                         widget: widget,
                         userModel: widget.userModel,
                         authUser: widget.authUser),
                     const Divider(color: Colors.white24),
-                    const Text('Admin', style: TextStyle(fontSize: 18, color: Colors.white)),
+                    const Text('Admin', style: TextStyle(fontSize: 18, color: customWhite)),
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 300,
@@ -192,8 +192,8 @@ class _AddAdminViewState extends State<AddAdminView> {
                               icon: Icon(Icons.arrow_drop_down, color: Colors.white),
                               items: [
                                 DropdownMenuItem(
-                                    value: 'Access', child: Text('Access', style: TextStyle(color: Colors.white))),
-                                DropdownMenuItem(value: 'Disable', child: Text('Disable', style: TextStyle(color: Colors.white))),
+                                    value: 'Access', child: Text('Access', style: TextStyle(color: customWhite))),
+                                DropdownMenuItem(value: 'Disable', child: Text('Disable', style: TextStyle(color: customWhite))),
                               ],
                               onChanged: (value) {  },
 

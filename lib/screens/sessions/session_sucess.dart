@@ -1,4 +1,6 @@
+import 'package:bookmywod_admin/screens/bottom_bar/bottom_bar_template.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart' show GoRouter;
 
 
 class SuccessScreen extends StatelessWidget {
@@ -16,16 +18,14 @@ class SuccessScreen extends StatelessWidget {
             children: [
               // Success Check Icon
               Container(
+                width: 300,
+                height: 300,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white.withOpacity(0.1),
                 ),
-                child: const Icon(
-                  Icons.check_circle,
-                  size: 80,
-                  color: Colors.blue,
-                ),
+                child: const Image(image: AssetImage('assets/suc.png'))
               ),
               const SizedBox(height: 30),
 
@@ -58,7 +58,8 @@ class SuccessScreen extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate back to home or previous screen
+                    GoRouter.of(context).push('/home');
+                    // Navigator.push(context, MaterialPageRoute(builder: (context)=> BottomBarTemplate()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,

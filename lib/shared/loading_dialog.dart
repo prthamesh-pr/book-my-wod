@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:bookmywod_admin/shared/loading_dialog_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -64,9 +65,8 @@ class LoadingDialog {
                     const SizedBox(
                       height: 10,
                     ),
-                    const SpinKitSpinningLines(
-                      color: Colors.white,
-                      size: 150,
+                    const CircularProgressIndicator(
+                      color: customWhite,
                     ),
                     const SizedBox(
                       height: 10,

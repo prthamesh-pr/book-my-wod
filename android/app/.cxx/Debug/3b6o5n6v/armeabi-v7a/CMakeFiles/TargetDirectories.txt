@@ -1,0 +1,2 @@
+C:/Users/priyanka619/Videos/bookmywodadmin-main (1)/bookmywodadmin-main/android/app/.cxx/Debug/3b6o5n6v/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/priyanka619/Videos/bookmywodadmin-main (1)/bookmywodadmin-main/android/app/.cxx/Debug/3b6o5n6v/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,5 +1,4 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:bookmywod_admin/sample.dart';
 import 'package:bookmywod_admin/screens/components/create_catagory_component.dart';
 import 'package:bookmywod_admin/screens/components/date_tile.dart';
@@ -7,13 +6,13 @@ import 'package:bookmywod_admin/screens/components/fitness_catagories_container.
 import 'package:bookmywod_admin/screens/components/side_navbar.dart';
 import 'package:bookmywod_admin/screens/schedule/all_session_view.dart';
 import 'package:bookmywod_admin/services/auth/auth_user.dart';
+import 'package:bookmywod_admin/services/database/models/catagory_model.dart';
 import 'package:bookmywod_admin/services/database/models/gym_model.dart';
 import 'package:bookmywod_admin/services/database/models/trainer_model.dart';
 import 'package:bookmywod_admin/services/database/supabase_storage/supabase_db.dart';
 import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:bookmywod_admin/shared/loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
@@ -24,7 +23,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.authUser,
-    required this.supabaseDb,
+    required this.supabaseDb
   });
 
   @override
@@ -33,7 +32,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
-
+  CatagoryModel? catagory;
   @override
   void initState() {
     super.initState();
@@ -55,9 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(
-                child: SpinKitSpinningLines(
-                  color: Colors.white,
-                  size: 150,
+                child: CircularProgressIndicator(
+                  color: customWhite,
                 ),
               ),
             );
@@ -137,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   icon: Icon(
                     Icons.mail_outline,
-                    color: Colors.white,
+                    color: customWhite,
                     size: 25,
                   ),
                 ),
@@ -148,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(
                     size: 25,
                     Icons.notifications_outlined,
-                    color: Colors.white,
+                    color: customWhite,
                   ),
                 )
               ],
@@ -165,7 +163,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         CreateCatagoryComponent(
                           widget: widget,
                           trainerModel: trainerModel,
-                        )
+                          gymId: catagory?.gymId ?? '',
+                          creatorId: catagory?.createdAt ?? '',
+                          catId: catagory?.catagoryId ?? '',
+                        ),
+
                       ],
                     );
                   } else if (snapshot.connectionState ==
@@ -199,7 +201,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         itemCount: 7,
                                         itemBuilder: (context, index) {
                                           DateTime date = weekDates[index];
-
                                           return DateTile(
                                             day: DateFormat('d').format(date),
                                             weekday:
@@ -237,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   'Todays Session',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: customWhite,
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -271,24 +272,24 @@ class _HomeScreenState extends State<HomeScreen> {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemBuilder: (context, index) {
-                                final catagory = data[index];
+                                 catagory = data[index];
                                 return FitnessCategoriesContainer(
-                                  name: catagory.name,
+                                  name: catagory!.name,
                                   categories:
-                                      catagory.features?.join(', ') ?? '',
+                                      catagory!.features?.join(', ') ?? '',
                                   onTap: () {
                                     GoRouter.of(context).push(
                                       '/session-view',
                                       extra: {
-                                        'supbaseDb': widget.supabaseDb,
-                                        'catagoryName': catagory.name,
-                                        'catagoryId': catagory.catagoryId,
-                                        'creatorId': catagory.uuidOfCreator,
+                                        'supabaseDb': widget.supabaseDb,
+                                        'catagoryName': catagory!.name,
+                                        'catagoryId': catagory!.catagoryId,
+                                        'creatorId': catagory!.uuidOfCreator,
                                         'gymId': trainerModel.gymId,
                                       },
                                     );
                                   },
-                                  image: catagory.image ??
+                                  image: catagory!.image ??
                                       'assets/events/heavylifting.png',
                                   sessionCount: 5,
                                 );
@@ -307,8 +308,60 @@ class _HomeScreenState extends State<HomeScreen> {
                               right: 16,
                               bottom: 16,
                             ),
-                            child: CreateCatagoryComponent(
-                                widget: widget, trainerModel: trainerModel),
+                            child: Container(
+                              width: double.infinity,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                color: customDarkBlue,
+                                borderRadius: BorderRadius.all(Radius.circular(15)),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Add New Categories',
+                                      style: TextStyle(
+                                        color: customWhite,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    OutlinedButton(
+                                        style: ButtonStyle(
+                                          side: WidgetStatePropertyAll(
+                                            BorderSide(
+                                              color: customBlue,
+                                              width: 2,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          GoRouter.of(context).push('/create-catagory', extra: {
+                                            'supabaseDb': widget.supabaseDb,
+                                            'trainerModel': trainerModel,
+                                            'catagoryId': catagory!.catagoryId,
+                                            'creatorId': catagory!.uuidOfCreator,
+                                            'gymId': catagory!.gymId,
+
+                                          });
+                                        },
+
+                                        child: Text(
+                                          'Add New Categories',
+                                          style: TextStyle(
+                                            color: customWhite,
+                                            fontSize: 16,
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            )
+
                           )
                         ],
                       ),

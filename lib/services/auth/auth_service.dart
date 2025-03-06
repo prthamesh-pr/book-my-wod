@@ -52,4 +52,6 @@ class AuthService implements AuthProvider {
 
   @override
   Future<AuthUser> signInWithGoogle() => provider.signInWithGoogle();
+  @override
+  Future<AuthUser> signInWithFacebook() => provider.signInWithFacebook();
 }

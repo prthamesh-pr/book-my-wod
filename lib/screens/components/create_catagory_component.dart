@@ -9,11 +9,20 @@ class CreateCatagoryComponent extends StatelessWidget {
     super.key,
     required this.widget,
     required this.trainerModel,
+    required this.gymId,
+    required this.creatorId,
+    required this.catId,
 
   });
 
   final HomeScreen widget;
   final TrainerModel? trainerModel;
+
+  final dynamic gymId;
+
+  final dynamic creatorId;
+
+  final dynamic catId;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +40,7 @@ class CreateCatagoryComponent extends StatelessWidget {
           Text(
             'Add New Categories',
             style: TextStyle(
-              color: Colors.white,
+              color: customWhite,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -50,11 +59,15 @@ class CreateCatagoryComponent extends StatelessWidget {
               GoRouter.of(context).push('/create-catagory', extra: {
                 'supabaseDb': widget.supabaseDb,
                 'trainerModel': trainerModel,
+                'catagoryId': catId,
+                'creatorId': creatorId,
+                'gymId': gymId,
+
               });
             },
 
             child: Text(
-                'Add New Categories',
+                'Add New Categories Home',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,

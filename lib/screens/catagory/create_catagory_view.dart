@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
-
 import 'package:bookmywod_admin/services/database/models/catagory_model.dart';
 import 'package:bookmywod_admin/services/database/models/trainer_model.dart';
 import 'package:bookmywod_admin/services/database/supabase_storage/supabase_db.dart';
@@ -25,9 +24,9 @@ class CreateCatagoryView extends StatefulWidget {
     super.key,
     this.supabaseDb,
     this.trainerModel,
-    this.catagoryId,
-    this.creatorId,
-    this.gymId,
+    required this.gymId,
+    required this.creatorId,
+    required this.catagoryId,
   });
 
   @override
@@ -108,6 +107,9 @@ class _CreateCatagoryViewState extends State<CreateCatagoryView> {
 
   @override
   void initState() {
+    print("check category Id ${widget.catagoryId}");
+    print("Gym Idcheck ${widget.gymId}");
+    print("creator Id Check ${widget.creatorId}");
     _catagoryNameController = TextEditingController();
     _catagoryFeaturesController = TextEditingController();
     super.initState();
@@ -250,7 +252,6 @@ class _CreateCatagoryViewState extends State<CreateCatagoryView> {
     );
   }
 
-
   Widget _buildImagePicker() {
     return GestureDetector(
       onTap: _pickImage,
@@ -267,24 +268,25 @@ class _CreateCatagoryViewState extends State<CreateCatagoryView> {
         ),
         child: _pickedImage == null
             ? const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(CupertinoIcons.share, size: 30, color: Colors.white),
-              SizedBox(height: 8),
-              Text('Upload Image', style: TextStyle(color: Colors.white)),
-            ],
-          ),
-        )
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.share, size: 30, color: Colors.white),
+                    SizedBox(height: 8),
+                    Text('Upload Image', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              )
             : ClipRRect(
-          borderRadius: BorderRadius.circular(14), // Prevents image from overflowing
-          child: Image.file(
-            _pickedImage!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        ),
+                borderRadius: BorderRadius.circular(14),
+                // Prevents image from overflowing
+                child: Image.file(
+                  _pickedImage!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
       ),
     );
   }
@@ -316,9 +318,10 @@ class _CreateCatagoryViewState extends State<CreateCatagoryView> {
             print('trainerModel: ${widget.trainerModel}');
             GoRouter.of(context).push('/create-session', extra: {
               'supabaseDb': widget.supabaseDb,
-              'catagoryId': widget.catagoryId,
-              'creatorId': widget.creatorId,
-              'gymId': widget.gymId,
+              'trainerModel': widget.trainerModel,
+              'catagoryId': widget.catagoryId ?? "",
+              'creatorId': widget.creatorId ?? "",
+              'gymId': widget.gymId?? "",
             });
 
             // GoRouter.of(context).push('/create-catagory', extra: {

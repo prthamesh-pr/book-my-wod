@@ -54,6 +54,10 @@ dependencies:
   provider:
   flutter_sound: ^9.23.1
   permission_handler: ^11.3.1
+  audioplayers: ^6.2.0
+  fl_chart: ^0.70.2
+  flutter_facebook_auth: ^7.1.1
+  
 
 dev_dependencies:
   flutter_test:

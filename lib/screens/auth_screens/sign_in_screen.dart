@@ -1,27 +1,22 @@
-import 'package:bookmywod_admin/screens/bottom_bar/bottom_bar_template.dart';
 import 'package:bookmywod_admin/utils/shared_preference_helper.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state.dart' as CustomAuthState;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bookmywod_admin/bloc/auth_bloc.dart';
 import 'package:bookmywod_admin/bloc/events/auth_event_login.dart';
-import 'package:bookmywod_admin/bloc/events/auth_event_should_register.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state_logged_out.dart';
 import 'package:bookmywod_admin/services/auth/auth_exceptions.dart';
 import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:bookmywod_admin/shared/constants/regex.dart';
-import 'package:bookmywod_admin/shared/custom_text_field.dart';
 import 'package:bookmywod_admin/shared/custom_button.dart';
 import 'package:bookmywod_admin/shared/show_snackbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as Supabase;
-
-import '../../bloc/events/auth_event_signin_with_google.dart';
+import '../../bloc/states/auth_state_loading.dart';
 
 class SignInScreen extends StatefulWidget {
-
   const SignInScreen({super.key});
 
   @override
@@ -29,6 +24,7 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  bool isLoading = false;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   final _formKey = GlobalKey<FormState>();
@@ -79,59 +75,15 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  Future<void> signInWithGoogle() async {
-    try {
-      const webClientId = '281809501684-9g294ilcupmj39m8ah79id3nh6ge0ocg.apps.googleusercontent.com';
-
-      /// TODO: update the iOS client ID with your own.
-      /// iOS Client ID that you registered with Google Cloud.
-      const iosClientId = 'my-ios.apps.googleusercontent.com';
-      // Add your Android client ID here
-      const androidClientId = '281809501684-meo33phfg32uedsfhjtcg10ibssi0uf8.apps.googleusercontent.com';
-
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: androidClientId,  // Update with your Android Client ID
-        scopes: ['email'],
-        serverClientId: webClientId,
-      );
-      await googleSignIn.signOut();
-
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return; // User canceled sign-in
-
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null) throw 'No Access Token found.';
-      if (idToken == null) throw 'No ID Token found.';
-
-      await supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BottomBarTemplate(),
-          ),
-        );
-      }
-    } catch (e) {
-      print('Google Sign-In Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, CustomAuthState.AuthState>(
       listener: (context, state) async {
+        // if (state is AuthStateLoading) {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text(state.message!.message)),
+        //   );
+        // }
         if (state is AuthStateLoggedOut) {
           await _saveCredentials();
           if (state.exception is UserNotFoundAuthException) {
@@ -169,81 +121,186 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 40),
                   Text(
                     'Sign In',
-                    style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.09),
+                    style: TextStyle(fontSize: 24),
                   ),
                   const SizedBox(height: 10),
-                  CustomTextField(
-                    label: 'Email Address',
-                    prefixIcon: Icon(Icons.email),
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Email can't be empty";
-                      } else if (!emailValid.hasMatch(value)) {
-                        return "Invalid email provided";
-                      }
-                      return null;
-                    },
+                  Text(
+                    'Welcome back! Log in to continue',
+                    style: TextStyle(fontSize: 16),
                   ),
+                  const SizedBox(height: 30),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40.0),
+                      border: Border.all(color: Color(0xffBAC0C6), width: 1.5), // Border for the field
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12), // Add some padding inside
+                    child: Row(
+                      children: [
+                        Icon(Icons.email_outlined, color: Colors.white), // Icon
+                        SizedBox(width: 8), // Space between icon and divider
+                        Container(width: 1, height: 24, color: Colors.grey), // Divider
+                        SizedBox(width: 8), // Space between divider and input field
+                        Expanded(
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Email can't be empty";
+                              } else if (!emailValid.hasMatch(value)) {
+                                return "Invalid email provided";
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: Colors.white), // Input text color
+                            decoration: InputDecoration(
+                              hintText: 'Email Address',
+                              hintStyle: TextStyle(color: Color(0xffBAC0C6)), // Placeholder color
+                              border: InputBorder.none, // Remove default border
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const SizedBox(height: 20),
-                  CustomTextField(
-                    label: 'Password',
-                    prefixIcon: Icon(Icons.lock),
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    onVisibilityToggle: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a valid password';
-                      }
-                      return null;
-                    },
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40.0),
+                      border: Border.all(color: Color(0xffBAC0C6), width: 1.5), // Border for the field
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12), // Inner padding
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock, color: Colors.white), // Lock icon
+                        SizedBox(width: 8), // Space between icon and divider
+                        Container(width: 1, height: 24, color: Colors.grey), // Divider
+                        SizedBox(width: 8), // Space between divider and input field
+                        Expanded(
+                          child: TextFormField(
+                            controller: _passwordController,
+                            obscureText: !_isPasswordVisible, // Toggle visibility
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a valid password';
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: Colors.white), // Input text color
+                            decoration: InputDecoration(
+                              hintText: 'Password',
+                              hintStyle: TextStyle(color: Color(0xffBAC0C6)), // Placeholder color
+                              border: InputBorder.none, // Remove default border
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      CupertinoCheckbox(
+                        value: rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            rememberMe = value!;
+                          });
+                        },
+                        checkColor: Colors.black,
+                        // activeColor: Colors.white, // Tick color
+                        fillColor: WidgetStateProperty.all(customWhite), // Background color
+                        shape: CircleBorder(), // Makes it circular
+                      ),
+                      Text(
+                        'Remember Me',
+                        style: TextStyle(color: customTextColor), // Adjust text color
+                      ),
+                      Spacer(), // Pushes "Forgot Password" to the right
+                      Text(
+                        'Forgot Password',
+                        style: TextStyle(color: customWhite), // Adjust text color
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
                     text: 'Sign In',
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final email = _emailController.text;
-                        final password = _passwordController.text;
-                        context.read<AuthBloc>().add(AuthEventLogin(email: email, password: password));
-                      }
-                    },
+                    isLoading: isLoading,
+                    onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              try {
+                                // Trigger Bloc event for authentication
+                                context.read<AuthBloc>().add(AuthEventLogin(
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                ));
+                              } catch (e) {
+                                print("Error: $e");
+                              }
+                              await Future.delayed(const Duration(seconds: 2));
+                              setState(() {
+                                isLoading = false;
+                              });
+                              // final email = _emailController.text;
+                              // final password = _passwordController.text;
+                              // context.read<AuthBloc>().add(AuthEventLogin(
+                              //     email: email, password: password));
+                            }
+                          },
                   ),
-                  const SizedBox(height: 20),
-                  Center(child: Text('or', style: TextStyle(fontSize: 30))),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildSocialButton('assets/auth/google.svg', (){
-                        context.read<AuthBloc>().add(
-                          AuthEventSignInWithGoogle(),
-                        );
-                      }),
-                      _buildSocialButton('assets/auth/facebook.svg', () {}),
-                      _buildSocialButton('assets/auth/apple.svg', () {}),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Don’t have any account? ", style: TextStyle(fontSize: 16)),
-                      TextButton(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(AuthEventShouldRegister());
-                        },
-                        child: Text('Sign Up', style: TextStyle(color: customBlue, fontSize: 16)),
-                      ),
-                    ],
-                  ),
+                  // Center(child: Text('or', style: TextStyle(fontSize: 30))),
+                  // const SizedBox(height: 20),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     _buildSocialButton('assets/auth/google.svg', (){
+                  //       context.read<AuthBloc>().add(
+                  //         AuthEventSignInWithGoogle(),
+                  //       );
+                  //     }),
+                  //     _buildSocialButton('assets/auth/facebook.svg', () {
+                  //       context.read<AuthBloc>().add(
+                  //         AuthEventSignInWithFacebook(),
+                  //       );
+                  //     }),
+                  //     if(Platform.isIOS)
+                  //     _buildSocialButton('assets/auth/apple.svg', () {}),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 30),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text("Don’t have any account? ",
+                  //         style: TextStyle(fontSize: 16)),
+                  //     TextButton(
+                  //       onPressed: () {
+                  //         context
+                  //             .read<AuthBloc>()
+                  //             .add(AuthEventShouldRegister());
+                  //       },
+                  //       child: Text('Sign Up',
+                  //           style: TextStyle(color: customBlue, fontSize: 16)),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

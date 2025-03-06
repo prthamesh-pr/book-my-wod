@@ -5,6 +5,7 @@ import 'package:bookmywod_admin/bloc/events/auth_event_logout.dart';
 import 'package:bookmywod_admin/bloc/events/auth_event_update_password.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state.dart';
 import 'package:bookmywod_admin/bloc/states/auth_state_update_password.dart';
+import 'package:bookmywod_admin/shared/constants/colors.dart';
 import 'package:bookmywod_admin/shared/custom_text_field.dart';
 import 'package:bookmywod_admin/shared/custom_button.dart';
 import 'package:bookmywod_admin/shared/show_snackbar.dart';
@@ -125,7 +126,7 @@ class _PasswordUpdateScreenState extends State<PasswordUpdateScreen> {
                   child: Text(
                     'Back to login',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: customWhite,
                     ),
                   ),
                 ),
