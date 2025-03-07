@@ -258,10 +258,10 @@ class _SignInScreenState extends State<SignInScreen> {
                               setState(() {
                                 isLoading = false;
                               });
-                              // final email = _emailController.text;
-                              // final password = _passwordController.text;
-                              // context.read<AuthBloc>().add(AuthEventLogin(
-                              //     email: email, password: password));
+                              final email = _emailController.text;
+                              final password = _passwordController.text;
+                              context.read<AuthBloc>().add(AuthEventLogin(
+                                  email: email, password: password));
                             }
                           },
                   ),

@@ -151,77 +151,222 @@ class _CreateSessionViewState extends State<CreateSessionView> {
     ).show(context);
   }
   Future<void> _selectTime(BuildContext context, int index) async {
-    BottomPicker.rangeTime(
-      initialFirstTime: DateTime.now(),
-      initialSecondTime: DateTime.now().add(const Duration(hours: 1)),
-      use24hFormat: false,
-      height: 400,
-      backgroundColor: customDarkBlue,
-      pickerTitle: const Text(
-        'Set Time Range',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-          color: customBlue,
-        ),
-      ),
-      pickerTextStyle: GoogleFonts.barlow(
-        textStyle: const TextStyle(
-          color: Colors.blue,
-          fontSize: 18,
-        ),
-      ),
-      onRangeTimeSubmitPressed: (startTime, endTime) {
-        setState(() {
-          timeSlots[index] = TimeSlot(
-            startTime: TimeOfDay.fromDateTime(startTime),
-            endTime: TimeOfDay.fromDateTime(endTime),
-          );
-        });
-      },
-    ).show(context);
-  }
-  Widget _timeSlotWidget(int index) {
-    final timeSlot = timeSlots[index];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
+  // Current values or defaults
+  final timeSlot = timeSlots[index];
+  int startHour = timeSlot.startHour ?? 8;
+  int startMinute = timeSlot.startMinute ?? 0;
+  int endHour = timeSlot.endHour ?? 9;
+  int endMinute = timeSlot.endMinute ?? 0;
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
             backgroundColor: customDarkBlue,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+            title: const Text(
+              'Select Time Slot',
+              style: TextStyle(color: Colors.white),
             ),
-          ),
-          onPressed: () => _selectTime(context, index),
-          child: Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.white),
-              const SizedBox(width: 4),
-              Text(
-                (timeSlot.startTime != null && timeSlot.endTime != null)
-                    ? "${timeSlot.startTime!.format(context)} - ${timeSlot.endTime!.format(context)}"
-                    : "Select Time",
-                style: const TextStyle(fontSize: 16, color: Colors.white),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Start Time Section
+                const Text(
+                  'Start Time',
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Hour selector
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Hour', style: TextStyle(color: customBlue)),
+                        Container(
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: customGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<int>(
+                            value: startHour,
+                            dropdownColor: customGrey,
+                            underline: Container(),
+                            items: List.generate(24, (i) => i).map((hour) {
+                              return DropdownMenuItem<int>(
+                                value: hour,
+                                child: Text(
+                                  hour.toString().padLeft(2, '0'),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setStateDialog(() {
+                                  startHour = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    // Minute selector
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Minute', style: TextStyle(color: customBlue)),
+                        Container(
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: customGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<int>(
+                            value: startMinute,
+                            dropdownColor: customGrey,
+                            underline: Container(),
+                            items: List.generate(12, (i) => i*5).map((minute) {
+                              return DropdownMenuItem<int>(
+                                value: minute,
+                                child: Text(
+                                  minute.toString().padLeft(2, '0'),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setStateDialog(() {
+                                  startMinute = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // End Time Section
+                const Text(
+                  'End Time',
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Hour selector
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Hour', style: TextStyle(color: customBlue)),
+                        Container(
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: customGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<int>(
+                            value: endHour,
+                            dropdownColor: customGrey,
+                            underline: Container(),
+                            items: List.generate(24, (i) => i).map((hour) {
+                              return DropdownMenuItem<int>(
+                                value: hour,
+                                child: Text(
+                                  hour.toString().padLeft(2, '0'),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setStateDialog(() {
+                                  endHour = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    // Minute selector
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Minute', style: TextStyle(color: customBlue)),
+                        Container(
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: customGrey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<int>(
+                            value: endMinute,
+                            dropdownColor: customGrey,
+                            underline: Container(),
+                            items: List.generate(12, (i) => i*5).map((minute) {
+                              return DropdownMenuItem<int>(
+                                value: minute,
+                                child: Text(
+                                  minute.toString().padLeft(2, '0'),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setStateDialog(() {
+                                  endMinute = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                onPressed: () => Navigator.pop(context),
+              ),
+              TextButton(
+                child: const Text('Save', style: TextStyle(color: customBlue)),
+                onPressed: () {
+                  setState(() {
+                    timeSlots[index] = TimeSlot(
+                      startHour: startHour, 
+                      startMinute: startMinute,
+                      endHour: endHour,
+                      endMinute: endMinute,
+                    );
+                  });
+                  Navigator.pop(context);
+                },
               ),
             ],
-          ),
-        ),
-        if (index > 0)
-          IconButton(
-            icon: const Icon(Icons.remove_circle, color: Colors.red),
-            onPressed: () {
-              setState(() {
-                timeSlots.removeAt(index);
-              });
-            },
-          ),
-      ],
-    );
-  }
-
+          );
+        }
+      );
+    },
+  );
+}
   @override
   void initState() {
     super.initState();
@@ -264,7 +409,7 @@ class _CreateSessionViewState extends State<CreateSessionView> {
 
     if (widget.sessionModel?.timeSlots != null) {
       timeSlots = widget.sessionModel!.timeSlots.map((slot) {
-        return TimeSlot(
+        return TimeSlot.fromTimeOfDay(
           startTime: _parseTime(slot['start_time']),
           endTime: _parseTime(slot['end_time']),
         );
@@ -458,7 +603,7 @@ class _CreateSessionViewState extends State<CreateSessionView> {
                     const SizedBox(height: 10),
                     Column(
                       children: List.generate(
-                          timeSlots.length, (index) => _timeSlotWidget(index)),
+                          timeSlots.length, (index) => _buildTimeSlotWidget(index)),
                     ),
                     const SizedBox(height: 10),
                     TextButton(
@@ -555,6 +700,49 @@ class _CreateSessionViewState extends State<CreateSessionView> {
       ),
     );
   }
+  Widget _buildTimeSlotWidget(int index) {
+    final timeSlot = timeSlots[index];
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Time Slot ${index + 1}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                setState(() {
+                  timeSlots.removeAt(index);
+                });
+              },
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Start: ${timeSlot.startHour?.toString().padLeft(2, '0')}:${timeSlot.startMinute?.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            Text(
+              'End: ${timeSlot.endHour?.toString().padLeft(2, '0')}:${timeSlot.endMinute?.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: () => _selectTime(context, index),
+            ),
+          ],
+        ),
+        const Divider(color: Colors.white),
+      ],
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -662,16 +850,45 @@ class _CreateSessionViewState extends State<CreateSessionView> {
 }
 
 class TimeSlot {
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
+  int? startHour;
+  int? startMinute;
+  int? endHour;
+  int? endMinute;
+  
+  TimeOfDay? get startTime => startHour != null && startMinute != null 
+      ? TimeOfDay(hour: startHour!, minute: startMinute!)
+      : null;
+      
+  TimeOfDay? get endTime => endHour != null && endMinute != null 
+      ? TimeOfDay(hour: endHour!, minute: endMinute!)
+      : null;
 
-  TimeSlot({this.startTime, this.endTime});
+  TimeSlot({this.startHour, this.startMinute, this.endHour, this.endMinute});
+  
+  // Constructor that accepts TimeOfDay objects
+  TimeSlot.fromTimeOfDay({TimeOfDay? startTime, TimeOfDay? endTime}) {
+    if (startTime != null) {
+      startHour = startTime.hour;
+      startMinute = startTime.minute;
+    }
+    if (endTime != null) {
+      endHour = endTime.hour;
+      endMinute = endTime.minute;
+    }
+  }
 
   Map<String, String> toJson() {
     return {
-      "start_time":
-          startTime != null ? "${startTime!.hour}:${startTime!.minute}" : "",
-      "end_time": endTime != null ? "${endTime!.hour}:${endTime!.minute}" : "",
+      "start_hour": startHour?.toString() ?? "",
+      "start_minute": startMinute?.toString() ?? "",
+      "end_hour": endHour?.toString() ?? "",
+      "end_minute": endMinute?.toString() ?? "",
+      "start_time": startHour != null && startMinute != null
+          ? "$startHour:$startMinute"
+          : "",
+      "end_time": endHour != null && endMinute != null 
+          ? "$endHour:$endMinute"
+          : "",
     };
   }
 }

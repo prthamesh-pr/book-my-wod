@@ -88,6 +88,8 @@ flutter:
     - assets/events/
     - assets/
     - assets/icons/
+    - assets/buttons/calendar-03.png
+    - assets/buttons/Group 19.png
     - .env
   #   - images/a_dot_ham.jpeg
 

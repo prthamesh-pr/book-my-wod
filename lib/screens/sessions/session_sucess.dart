@@ -2,7 +2,12 @@ import 'package:bookmywod_admin/screens/bottom_bar/bottom_bar_template.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart' show GoRouter;
 
-
+void main() {
+  runApp(const MaterialApp(
+    home: SuccessScreen(),
+    debugShowCheckedModeBanner: false,
+  ));
+}
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
 
@@ -23,7 +28,6 @@ class SuccessScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.1),
                 ),
                 child: const Image(image: AssetImage('assets/suc.png'))
               ),
@@ -46,7 +50,7 @@ class SuccessScreen extends StatelessWidget {
                 "Session added successfully, go by session categories to check it.",
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.white70,
+                  color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),

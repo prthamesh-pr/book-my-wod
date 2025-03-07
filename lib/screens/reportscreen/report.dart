@@ -1,4 +1,12 @@
-import 'package:fl_chart/fl_chart.dart' show BarChart, BarChartData, BarChartGroupData, BarChartRodData, FlBorderData, FlGridData, FlTitlesData;
+import 'package:fl_chart/fl_chart.dart'
+    show
+        BarChart,
+        BarChartData,
+        BarChartGroupData,
+        BarChartRodData,
+        FlBorderData,
+        FlGridData,
+        FlTitlesData;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -8,14 +16,23 @@ void main() {
   ));
 }
 
-class ReportScreen extends StatelessWidget {
+class ReportScreen extends StatefulWidget {
+  @override
+  _ReportScreenState createState() => _ReportScreenState();
+}
+
+class _ReportScreenState extends State<ReportScreen> {
+  int selectedIndex = 0;
+  final List<String> tabs = ["All (950)", "Monthly (700)", "Yearly (200)", "Cancel (50)"];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF0D1B2A),
       appBar: AppBar(
         backgroundColor: Color(0xFF0D1B2A),
-        title: Text("Report", style: TextStyle(color: Colors.white, fontSize: 18)),
+        title:
+            Text("Report", style: TextStyle(color: Colors.white, fontSize: 18)),
         elevation: 0,
         leading: Icon(Icons.arrow_back, color: Colors.white),
       ),
@@ -56,7 +73,11 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCard({required String title, required String amount, required String percentage, required List<int> chartData}) {
+  Widget _buildCard(
+      {required String title,
+      required String amount,
+      required String percentage,
+      required List<int> chartData}) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -64,34 +85,71 @@ class ReportScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: TextStyle(color: Colors.white70, fontSize: 14)),
-              SizedBox(height: 5),
-              Text(amount, style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-              SizedBox(height: 5),
-              Text("All time update", style: TextStyle(color: Colors.white38, fontSize: 12)),
-            ],
+          // First column
+          Expanded(
+            flex: 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(color: Colors.white70, fontSize: 14)),
+                SizedBox(height: 8),
+                Container(
+                  height: 1,
+                  width: 130,
+                  color: Color(0xFF21374D), // Same color as the right container
+                ),
+                SizedBox(height: 8),
+                Text(amount,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold)),
+                SizedBox(height: 5),
+                Text("All time update",
+                    style: TextStyle(color: Colors.white38, fontSize: 12)),
+              ],
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text("↑ $percentage", style: TextStyle(color: Colors.greenAccent, fontSize: 14)),
-              SizedBox(height: 8),
-              Container(
-                width: 80,
-                height: 40,
-                child: BarChart(BarChartData(
-                  barGroups: chartData.asMap().entries.map((e) => BarChartGroupData(x: e.key, barRods: [BarChartRodData(toY: e.value.toDouble(), color: Colors.blueAccent)])).toList(),
-                  borderData: FlBorderData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  gridData: FlGridData(show: false),
-                )),
+          // Second column (50% width, styled)
+
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0xFF21374D),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("↑ $percentage",
+                      style:
+                          TextStyle(color: Colors.greenAccent, fontSize: 14)),
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    height: 40,
+                    child: BarChart(BarChartData(
+                      barGroups: chartData
+                          .asMap()
+                          .entries
+                          .map((e) => BarChartGroupData(x: e.key, barRods: [
+                                BarChartRodData(
+                                    toY: e.value.toDouble(),
+                                    color: Colors.blueAccent)
+                              ]))
+                          .toList(),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(show: false),
+                      gridData: FlGridData(show: false),
+                    )),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -111,44 +169,117 @@ class ReportScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Earning Period", style: TextStyle(color: Colors.white70, fontSize: 14)),
+              Text("Earning Period",
+                  style: TextStyle(color: Colors.white70, fontSize: 14)),
               Icon(Icons.calendar_today, color: Colors.white54, size: 16),
             ],
           ),
           SizedBox(height: 10),
-          Text("16 Jan - 16 Feb 2025", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text("16 Jan - 16 Feb 2025",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
           SizedBox(height: 10),
-          Text("One Month Earning: € 100 K", style: TextStyle(color: Colors.white70, fontSize: 14)),
+          Text("One Month Earning: € 100 K",
+              style: TextStyle(color: Colors.white70, fontSize: 14)),
           SizedBox(height: 5),
-          Text("One Month Earning: € 100 K", style: TextStyle(color: Colors.white70, fontSize: 14)),
+          Text("One Month Earning: € 100 K",
+              style: TextStyle(color: Colors.white70, fontSize: 14)),
         ],
       ),
     );
   }
 
-  Widget _buildTabBar() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: ["All (950)", "Monthly (700)", "Yearly (200)", "Cancel (50)"].map((tab) {
-        return Text(tab, style: TextStyle(color: Colors.white54, fontSize: 14));
-      }).toList(),
+Widget _buildTabBar() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: tabs.asMap().entries.map((entry) {
+              int idx = entry.key;
+              String name = entry.value;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedIndex = idx;
+                  });
+                },
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: selectedIndex == idx ? FontWeight.bold : FontWeight.normal,
+                    color: selectedIndex == idx ? Colors.blueAccent : Colors.white54,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 8),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Container(
+              width: double.infinity,
+              height: 2,
+              color: Color(0xFF334658),
+              child: Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    left: (MediaQuery.of(context).size.width - 52) / 
+                          tabs.length * 
+                          selectedIndex +
+                          ((MediaQuery.of(context).size.width - 52) / 
+                          tabs.length - 60) / 2,
+                    child: Container(
+                      width: 60,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+
   Widget _buildUserList() {
     List<String> users = [
-      "Makenna Curtis", "Kierra Siphron", "Cheyenne Levin", "Jaylan Lubin", "Marcus Dowart", "Roger Schleifer",
-      "Omar Saris", "Hanna Donin", "Nolan Vaccaro", "Gustavo Bootsh", "Nolan George", "Desirae Vaccaro"
+      "Makenna Curtis",
+      "Kierra Siphron",
+      "Cheyenne Levin",
+      "Jaylan Lubin",
+      "Marcus Dowart",
+      "Roger Schleifer",
+      "Omar Saris",
+      "Hanna Donin",
+      "Nolan Vaccaro",
+      "Gustavo Bootsh",
+      "Nolan George",
+      "Desirae Vaccaro"
     ];
     return ListView.builder(
       itemCount: users.length,
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(users[index], style: TextStyle(color: Colors.white, fontSize: 14)),
-          trailing: Icon(Icons.lock, color: Colors.white54, size: 18),
+          title: Text(users[index],
+              style: TextStyle(color: Colors.white, fontSize: 14)),
+          trailing: Icon(Icons.message, color: Colors.white54, size: 18),
         );
       },
-    );
+    ); 
   }
 }
 
@@ -192,10 +323,11 @@ class EarningPeriodWidget extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-                Icon(
-                  Icons.calendar_today,
+                Image(
+                  image: AssetImage('assets/buttons/calendar-03.png'),
+                  width: 18,
+                  height: 18,
                   color: Colors.white70,
-                  size: 18,
                 ),
               ],
             ),
@@ -203,12 +335,19 @@ class EarningPeriodWidget extends StatelessWidget {
           SizedBox(height: 10),
 
           // Earnings Section
-          Column(
-            children: [
-              _buildEarningsRow("One Month Earning:", "€ 100 K"),
-              Divider(color: Colors.white24, thickness: 1), // Thin line
-              _buildEarningsRow("One Month Earning:", "€ 100 K"),
-            ],
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Color(0xFF21374D), // Requested color #21374D
+              borderRadius: BorderRadius.circular(10), // Rounded corners
+            ),
+            child: Column(
+              children: [
+                _buildEarningsRow("One Month Earning:", "€ 100 K"),
+                Divider(color: Colors.white24, thickness: 1), // Thin line
+                _buildEarningsRow("One Month Earning:", "€ 100 K"),
+              ],
+            ),
           ),
         ],
       ),

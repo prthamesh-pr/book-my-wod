@@ -1,15 +1,15 @@
 // import 'package:flutter/material.dart';
 // import 'package:go_router/go_router.dart';
-//
+
 // import '../services/database/models/session_model.dart';
-//
+
 // class EditSessionScreen extends StatefulWidget {
 //   final dynamic supabaseDb;
 //   final String catagoryId;
 //   final String creatorId;
 //   final dynamic sessionModel;
 //   final String gymId;
-//
+
 //   const EditSessionScreen({
 //     Key? key,
 //     required this.supabaseDb,
@@ -18,34 +18,34 @@
 //     required this.sessionModel,
 //     required this.gymId,
 //   }) : super(key: key);
-//
+
 //   @override
 //   _EditSessionScreenState createState() => _EditSessionScreenState();
 // }
-//
+
 // class _EditSessionScreenState extends State<EditSessionScreen> {
 //   late TextEditingController _sessionNameController;
 //   TimeOfDay? startTime;
 //   TimeOfDay? endTime;
 //   int seatLimit = 0;
-//
+
 //   @override
 //   void initState() {
 //     super.initState();
-//
+
 //     // Initialize session details
 //     _sessionNameController = TextEditingController(text: widget.sessionModel[0]['fullName']);
 //     startTime = _parseTime(widget.sessionModel['startTime']);
 //     endTime = _parseTime(widget.sessionModel['endTime']);
 //     seatLimit = widget.sessionModel['seatLimit'] ?? 10; // Default to 10 if null
 //   }
-//
+
 //   // Convert String "HH:mm" to TimeOfDay
 //   TimeOfDay _parseTime(String timeString) {
 //     final parts = timeString.split(':');
 //     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
 //   }
-//
+
 //   // Pick Time Function
 //   Future<void> _pickTime(BuildContext context, bool isStart) async {
 //     final picked = await showTimePicker(
@@ -62,7 +62,7 @@
 //       });
 //     }
 //   }
-//
+
 //   // Save Changes & Update Supabase
 //   Future<void> _saveChanges() async {
 //     // final updatedSession = {
@@ -114,7 +114,7 @@
 //     // Navigate back
 //     context.pop();
 //   }
-//
+
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -146,7 +146,7 @@
 //               ),
 //             ),
 //             const SizedBox(height: 20),
-//
+
 //             // Session Name
 //             TextField(
 //               controller: _sessionNameController,
@@ -163,7 +163,7 @@
 //               ),
 //             ),
 //             const SizedBox(height: 15),
-//
+
 //             // Time Pickers Row
 //             Row(
 //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -179,7 +179,7 @@
 //               ],
 //             ),
 //             const SizedBox(height: 20),
-//
+
 //             // Seat Limit Section
 //             Container(
 //               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -219,9 +219,9 @@
 //                 ],
 //               ),
 //             ),
-//
+
 //             const SizedBox(height: 30),
-//
+
 //             // Save Changes Button
 //             Center(
 //               child: Container(
@@ -245,7 +245,7 @@
 //       ),
 //     );
 //   }
-//
+
 //   // Time Card Widget
 //   Widget _timeCard(String title, TimeOfDay? time) {
 //     return Container(
